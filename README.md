@@ -124,3 +124,42 @@ chmod +x run.sh
    - **I (Interface Segregation / Segregacion de Interfaces):** Se crearon interfaces atomicas (`IRepositorio<T>` e `IRepositorioEstado`) para que las clases no dependan de metodos que no necesitan.
    - **D (Dependency Inversion / Inversion de Dependencias):** Los repositorios implementan abstracciones (`IRepositorio<T>`), permitiendo que las capas superiores interactuen a traves de interfaces.
 
+
+
+---
+
+## 9. Segunda Etapa: Requerimientos del Examen Java (GestorPrestamos)
+
+Para cumplir con la segunda etapa del examen, se incorporó la clase `GestorPrestamos` en el paquete `co.com.crediya.servicio` y su correspondiente navegación en consola:
+
+### 1. Carga de datos desde MySQL vía JDBC (Requerimiento 1)
+- **Método:** `public List<Prestamo> cargarPrestamos()`
+- Conecta a MySQL mediante `ConexionBD` y consulta la tabla `prestamos` con los campos especificados: `id`, `cliente_id`, `monto`, `interes`, `fecha_prestamo`, `fecha_vencimiento` y `estado`.
+- Almacena los registros en una lista de objetos `Prestamo` mapeando adecuadamente cada atributo.
+
+### 2. Filtrado de Préstamos Vencidos (Requerimiento 2)
+- **Método:** `public List<Prestamo> filtrarPrestamosVencidos(List<Prestamo> lista)`
+- Implementa **Stream API** y expresiones **Lambda** (`p -> LocalDate.parse(p.getFechaVencimiento()).isBefore(LocalDate.now())`).
+- Evalúa si la fecha de vencimiento es anterior a la fecha actual del sistema.
+
+### 3. Filtrado de Préstamos Activos (Requerimiento 3)
+- **Método:** `public List<Prestamo> filtrarPrestamosActivos(List<Prestamo> lista)`
+- Implementa **Stream API** y expresiones **Lambda** (`p -> "ACTIVO".equalsIgnoreCase(p.getEstado())`).
+- Retorna exclusivamente los créditos con estado `"ACTIVO"`.
+
+### 4. Resumen Ejecutivo de Cartera (Requerimiento 4)
+- **Método:** `public void mostrarResumen(List<Prestamo> lista)`
+- Imprime en consola un informe con:
+  - Número total de préstamos activos.
+  - Número total de préstamos vencidos.
+  - Monto total adeudado (saldo pendiente por cobrar).
+
+### 5. Control de Excepciones (Requerimiento 5)
+- Bloques `try-catch` en cada método que capturan `SQLException`, `DateTimeParseException` y `Exception` general, mostrando mensajes claros y amigables al usuario sin interrumpir la ejecución del sistema.
+- Validación de listas nulas o vacías antes del procesamiento.
+
+### 6. Como acceder en el Menú de la Aplicación
+1. Inicie sesión como Administrador (`admin` / `admin123`) o como Asesor (`diana` / `1234`).
+2. Seleccione la opción **6. Modulo de Reportes de Prestamos (Streams / Lambdas)**.
+3. Dentro del submenú, elija la opción **6. Examen Java (GestorPrestamos: Activos, Vencidos, Resumen y Saldo)**.
+4. Podrá ejecutar cada requerimiento individualmente o correr la **Opción 5 (Demostración Completa del Examen)**.

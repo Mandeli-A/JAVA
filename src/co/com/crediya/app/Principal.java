@@ -12,10 +12,12 @@ import co.com.crediya.modelo.Pago;
 import co.com.crediya.modelo.Prestamo;
 import co.com.crediya.modelo.Rol;
 import co.com.crediya.modelo.Solicitud;
+import co.com.crediya.servicio.GestorPrestamos;
 import co.com.crediya.servicio.ServicioArchivos;
 import co.com.crediya.servicio.ServicioReportes;
 
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
 import java.util.Scanner;
 
@@ -29,6 +31,7 @@ public class Principal {
     private static final RepositorioPago repoPago = new RepositorioPago();
     private static final ServicioReportes servicioReportes = new ServicioReportes();
     private static final ServicioArchivos servicioArchivos = new ServicioArchivos();
+    private static final GestorPrestamos gestorPrestamos = new GestorPrestamos();
 
     public static void main(String[] args) {
         boolean ejecutando = true;
@@ -95,7 +98,7 @@ public class Principal {
             System.out.println("3. Evaluacion de Solicitudes");
             System.out.println("4. Gestion de Prestamos");
             System.out.println("5. Modulo de Pagos y Abonos");
-            System.out.println("6. Modulo de Reportes (Streams / Lambdas)");
+            System.out.println("6. Modulo de Reportes de Prestamos (Streams / Lambdas)");
             System.out.println("7. Respaldos y Archivos");
             System.out.println("8. Cerrar Sesion");
             System.out.println("0. Salir del Sistema");
@@ -153,7 +156,8 @@ public class Principal {
             System.out.println("6. Consultar Prestamos de un Cliente");
             System.out.println("7. Registrar Pago / Abono");
             System.out.println("8. Consultar Historial de Pagos de Prestamo");
-            System.out.println("9. Cerrar Sesion");
+            System.out.println("9. Reportes de Prestamos / Examen Java");
+            System.out.println("10. Cerrar Sesion");
             System.out.println("0. Salir del Sistema");
             System.out.print("Seleccione una opcion: ");
             int opcion = leerEntero();
@@ -184,6 +188,9 @@ public class Principal {
                     historialPagosPrestamo();
                     break;
                 case 9:
+                    menuExamenJava();
+                    break;
+                case 10:
                     enMenu = false;
                     System.out.println("\nSesion finalizada con exito.");
                     pausar();
@@ -692,6 +699,7 @@ public class Principal {
             System.out.println("1. Listar Todos los Prestamos");
             System.out.println("2. Consultar Prestamo por ID");
             System.out.println("3. Consultar Prestamos por Cliente");
+            System.out.println("4. Reportes de Prestamos / Examen Java");
             System.out.println("0. Volver al Menu Anterior");
             System.out.print("Seleccione una opcion: ");
             int op = leerEntero();
@@ -705,6 +713,9 @@ public class Principal {
                     break;
                 case 3:
                     consultarPrestamosPorCliente();
+                    break;
+                case 4:
+                    menuExamenJava();
                     break;
                 case 0:
                     volver = true;
@@ -930,12 +941,13 @@ public class Principal {
     private static void submenuReportes() {
         boolean volver = false;
         while (!volver) {
-            System.out.println("\n------------ MODULO DE REPORTES (STREAMS / LAMBDAS) ------------");
+            System.out.println("\n------------ REPORTES DE PRESTAMOS Y CARTERA ------------");
             System.out.println("1. Resumen General de Cartera");
             System.out.println("2. Listar Prestamos PENDIENTES (Stream Filter)");
             System.out.println("3. Listar Prestamos PAGADOS (Stream Filter)");
             System.out.println("4. Top 5 Prestamos con Mayor Saldo Pendiente (Stream Sort & Limit)");
             System.out.println("5. Exportar Informe Consolidado a Archivo de Texto (.txt)");
+            System.out.println("6. Examen Java (GestorPrestamos: Activos, Vencidos, Resumen y Saldo)");
             System.out.println("0. Volver al Menu Anterior");
             System.out.print("Seleccione una opcion: ");
             int op = leerEntero();
@@ -955,6 +967,9 @@ public class Principal {
                     break;
                 case 5:
                     exportarReporteTexto();
+                    break;
+                case 6:
+                    menuExamenJava();
                     break;
                 case 0:
                     volver = true;
@@ -1007,6 +1022,114 @@ public class Principal {
         } else {
             System.out.println("Error al exportar archivo de texto.");
         }
+        pausar();
+    }
+
+    // =========================================================================
+    // SECCION EXAMEN JAVA - GESTOR DE PRESTAMOS (SEGUNDA ETAPA)
+    // =========================================================================
+
+    private static void menuExamenJava() {
+        boolean volver = false;
+        while (!volver) {
+            System.out.println("\n==========================================================================");
+            System.out.println("                  ITEM EXAMEN JAVA - GESTOR DE PRESTAMOS                  ");
+            System.out.println("==========================================================================");
+            System.out.println("1. Cargar Prestamos desde BD MySQL (JDBC - Requerimiento 1)");
+            System.out.println("2. Ver Prestamos ACTIVOS (Streams / Lambdas - Requerimiento 3)");
+            System.out.println("3. Ver Prestamos VENCIDOS (Streams / Lambdas - Requerimiento 2)");
+            System.out.println("4. Mostrar Resumen de Cartera y Saldo Adeudado (Requerimiento 4)");
+            System.out.println("5. Ejecutar Demostracion Completa del Examen (Puntos 1 al 5)");
+            System.out.println("0. Volver al Menu de Reportes");
+            System.out.print("Seleccione una opcion: ");
+            int op = leerEntero();
+
+            switch (op) {
+                case 1:
+                    examenCargarPrestamos();
+                    break;
+                case 2:
+                    examenFiltrarActivos();
+                    break;
+                case 3:
+                    examenFiltrarVencidos();
+                    break;
+                case 4:
+                    examenMostrarResumen();
+                    break;
+                case 5:
+                    examenDemostracionCompleta();
+                    break;
+                case 0:
+                    volver = true;
+                    break;
+                default:
+                    System.out.println("\nOpcion no valida.");
+                    pausar();
+            }
+        }
+    }
+
+    private static void examenCargarPrestamos() {
+        System.out.println("\n--- [REQUERIMIENTO 1] CARGAR PRESTAMOS DESDE BD (JDBC) ---");
+        List<Prestamo> lista = gestorPrestamos.cargarPrestamos();
+        gestorPrestamos.imprimirTablaPrestamos(lista, "Todos los Préstamos Cargados desde MySQL (JDBC)");
+        pausar();
+    }
+
+    private static void examenFiltrarActivos() {
+        System.out.println("\n--- [REQUERIMIENTO 3] FILTRAR PRESTAMOS ACTIVOS (STREAMS / LAMBDAS) ---");
+        List<Prestamo> lista = gestorPrestamos.cargarPrestamos();
+        List<Prestamo> activos = gestorPrestamos.filtrarPrestamosActivos(lista);
+        gestorPrestamos.imprimirTablaPrestamos(activos, "Préstamos con Estado ACTIVO (Stream API)");
+        System.out.printf("Total encontrados con estado ACTIVO: %d\n", activos.size());
+        pausar();
+    }
+
+    private static void examenFiltrarVencidos() {
+        System.out.println("\n--- [REQUERIMIENTO 2] FILTRAR PRESTAMOS VENCIDOS (STREAMS / LAMBDAS) ---");
+        System.out.println("Criterio: fecha_vencimiento anterior a la fecha actual (" + LocalDate.now() + ")");
+        List<Prestamo> lista = gestorPrestamos.cargarPrestamos();
+        List<Prestamo> vencidos = gestorPrestamos.filtrarPrestamosVencidos(lista);
+        gestorPrestamos.imprimirTablaPrestamos(vencidos, "Préstamos Vencidos (Fecha Vencimiento < Fecha Actual)");
+        System.out.printf("Total préstamos vencidos encontrados: %d\n", vencidos.size());
+        pausar();
+    }
+
+    private static void examenMostrarResumen() {
+        System.out.println("\n--- [REQUERIMIENTO 4] RESUMEN DE CARTERA (TOTALES Y SALDO ADEUDADO) ---");
+        List<Prestamo> lista = gestorPrestamos.cargarPrestamos();
+        gestorPrestamos.mostrarResumen(lista);
+        pausar();
+    }
+
+    private static void examenDemostracionCompleta() {
+        System.out.println("\n==========================================================================");
+        System.out.println("          DEMOSTRACION COMPLETA - SEGUNDA ETAPA EXAMEN JAVA               ");
+        System.out.println("==========================================================================");
+
+        System.out.println("\n[PASO 1] Conectando a MySQL mediante JDBC y cargando objetos Prestamo...");
+        List<Prestamo> lista = gestorPrestamos.cargarPrestamos();
+        gestorPrestamos.imprimirTablaPrestamos(lista, "Catálogo General de Préstamos");
+
+        System.out.println("\n[PASO 2] Filtrando préstamos con estado ACTIVO usando Stream API y Lambdas...");
+        List<Prestamo> activos = gestorPrestamos.filtrarPrestamosActivos(lista);
+        gestorPrestamos.imprimirTablaPrestamos(activos, "Filtro: Préstamos con Estado ACTIVO");
+
+        System.out.println("\n[PASO 3] Filtrando préstamos VENCIDOS (fecha_vencimiento < fecha actual)...");
+        List<Prestamo> vencidos = gestorPrestamos.filtrarPrestamosVencidos(lista);
+        gestorPrestamos.imprimirTablaPrestamos(vencidos, "Filtro: Préstamos Vencidos");
+
+        System.out.println("\n[PASO 4] Generando informe resumen (Activos, Vencidos y Monto Adeudado)...");
+        gestorPrestamos.mostrarResumen(lista);
+
+        System.out.println("\n[PASO 5] Verificando manejo de excepciones (lista vacía y lista nula)...");
+        System.out.println("-> Prueba con lista vacía:");
+        gestorPrestamos.mostrarResumen(Collections.emptyList());
+        System.out.println("-> Prueba con lista nula:");
+        gestorPrestamos.mostrarResumen(null);
+
+        System.out.println("\nDemostración finalizada exitosamente.");
         pausar();
     }
 
